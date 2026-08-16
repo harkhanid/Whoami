@@ -1,0 +1,19 @@
+{
+  "name": "whoami-party",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Real-time multiplayer 'Who Am I?' party game — host a room, pick a category, everyone gets a secret character on their forehead.",
+  "main": "server/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.18.0"
+  }
+}

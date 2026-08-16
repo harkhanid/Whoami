@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en" data-screen="boot">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#07070c" />
+<title>Who Am I? — the forehead guessing game</title>
+<meta name="description" content="Host a room, pick a category, and everyone gets a secret character on their forehead. Up to 4 players." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/styles.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>" />
+</head>
+<body>
+
+<div class="aurora" aria-hidden="true">
+  <span class="orb orb-1"></span>
+  <span class="orb orb-2"></span>
+  <span class="orb orb-3"></span>
+  <span class="grain"></span>
+</div>
+
+<div id="toaster" class="toaster" role="status" aria-live="polite"></div>
+<div id="confetti" class="confetti-layer" aria-hidden="true"></div>
+<div id="reactions" class="reaction-layer" aria-hidden="true"></div>
+
+<!-- ══════════════════════════════════════════════════ HOME ══ -->
+<main class="screen screen-home" data-screen="home">
+  <div class="home-wrap">
+    <header class="brand">
+      <div class="brand-mark">🎭</div>
+      <h1 class="brand-title">Who&nbsp;Am&nbsp;<em>I?</em></h1>
+      <p class="brand-sub">Everyone gets a secret character stuck to their forehead.
+        You can see theirs. You can't see yours. Ask yes-or-no questions until it clicks.</p>
+    </header>
+
+    <section class="panel identity-panel">
+      <div class="field">
+        <label for="name-input">Your name</label>
+        <input id="name-input" class="input" type="text" maxlength="16" placeholder="e.g. Dharmik" autocomplete="nickname" spellcheck="false" />
+      </div>
+
+      <div class="field">
+        <label>Pick an avatar</label>
+        <div id="avatar-picker" class="avatar-picker" role="radiogroup" aria-label="Avatar"></div>
+      </div>
+
+      <div class="home-actions">
+        <button id="btn-host" class="btn btn-primary btn-lg">
+          <span class="btn-glow"></span>
+          Host a room
+        </button>
+        <div class="or"><span>or join one</span></div>
+        <form id="join-form" class="join-row" autocomplete="off">
+          <input id="code-input" class="input input-code" type="text" maxlength="4" placeholder="CODE"
+                 inputmode="latin" autocapitalize="characters" spellcheck="false" aria-label="Room code" />
+          <button id="btn-join" class="btn btn-ghost" type="submit">Join</button>
+        </form>
+      </div>
+    </section>
+
+    <ul class="how-strip">
+      <li><b>1</b> Host opens a room and shares the 4-letter code</li>
+      <li><b>2</b> Host picks a category — celebrities, history, movies…</li>
+      <li><b>3</b> Take turns asking yes/no questions until you guess yourself</li>
+    </ul>
+  </div>
+</main>
+
+<!-- ═════════════════════════════════════════════════ LOBBY ══ -->
+<main class="screen screen-lobby" data-screen="lobby">
+  <div class="lobby-wrap">
+    <section class="code-hero panel">
+      <div class="code-hero-left">
+        <span class="eyebrow">Room code</span>
+        <button id="code-copy" class="code-display" title="Copy the invite link">
+          <span id="room-code">····</span>
+          <svg viewBox="0 0 24 24" class="copy-icon" aria-hidden="true"><path d="M9 9V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3M6 9h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z"/></svg>
+        </button>
+        <p class="code-hint">Tap to copy the invite link · up to 4 players</p>
+      </div>
+      <div class="code-hero-right">
+        <div id="lobby-seats" class="seat-strip"></div>
+      </div>
+    </section>
+
+    <section class="panel category-panel">
+      <div class="panel-head">
+        <div>
+          <h2>Choose a category</h2>
+          <p id="category-sub" class="muted">The host decides what everybody is playing with.</p>
+        </div>
+        <div id="timer-picker" class="segmented" role="radiogroup" aria-label="Turn timer"></div>
+      </div>
+      <div id="category-grid" class="category-grid"></div>
+    </section>
+  </div>
+
+  <div class="lobby-dock">
+    <button id="btn-leave-lobby" class="btn btn-quiet">Leave room</button>
+    <p id="lobby-status" class="lobby-status">Waiting for players…</p>
+    <button id="btn-start" class="btn btn-primary btn-lg" disabled>
+      <span class="btn-glow"></span>
+      Start game
+    </button>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════════════ GAME ══ -->
+<main class="screen screen-game" data-screen="game">
+  <header class="game-bar">
+    <div class="game-bar-left">
+      <span class="chip chip-code" id="game-code">····</span>
+      <span class="chip chip-category" id="game-category">—</span>
+    </div>
+    <div class="game-bar-right">
+      <div class="timer" id="timer">
+        <svg viewBox="0 0 44 44" class="timer-ring" aria-hidden="true">
+          <circle class="timer-track" cx="22" cy="22" r="19"></circle>
+          <circle class="timer-fill" cx="22" cy="22" r="19"></circle>
+        </svg>
+        <span class="timer-num" id="timer-num">–</span>
+      </div>
+      <button id="btn-sound" class="icon-btn" title="Toggle sound" aria-label="Toggle sound">🔊</button>
+      <button id="btn-quit" class="icon-btn" title="Leave game" aria-label="Leave game">✕</button>
+    </div>
+  </header>
+
+  <div class="turn-banner" id="turn-banner">
+    <span class="turn-dot"></span>
+    <span id="turn-text">Dealing cards…</span>
+  </div>
+
+  <section class="table" id="table"></section>
+
+  <aside class="feed-rail panel" id="feed-rail">
+    <h3>Activity</h3>
+    <ul id="feed-list" class="feed-list"></ul>
+    <form id="say-form" class="say-form" autocomplete="off">
+      <input id="say-input" class="input say-input" maxlength="120" placeholder="Ask a question…" aria-label="Say something" />
+      <button class="icon-btn" type="submit" aria-label="Send">➤</button>
+    </form>
+  </aside>
+
+  <footer class="dock">
+    <div class="reaction-bar" id="reaction-bar"></div>
+    <div class="dock-actions" id="dock-actions"></div>
+  </footer>
+</main>
+
+<!-- ═══════════════════════════════════════════════ RESULTS ══ -->
+<main class="screen screen-results" data-screen="results">
+  <div class="results-wrap">
+    <h2 class="results-title">Cards on the table</h2>
+    <p class="results-sub" id="results-sub">Here's what everyone was wearing.</p>
+    <div class="results-grid" id="results-grid"></div>
+    <div class="results-actions">
+      <button id="btn-again" class="btn btn-primary btn-lg"><span class="btn-glow"></span>Play another round</button>
+      <button id="btn-exit" class="btn btn-quiet">Back to home</button>
+    </div>
+  </div>
+</main>
+
+<div id="curtain" class="curtain"><div class="curtain-inner"><span class="spinner"></span><p id="curtain-text">Connecting…</p></div></div>
+
+<script src="/app.js" type="module"></script>
+</body>
+</html>
